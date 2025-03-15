@@ -1,0 +1,9 @@
+FROM nginx:stable-alpine
+
+# Create /var/log/nginx and /var/cache/nginx and change ownership to nginx
+RUN mkdir -p /var/log/nginx /var/cache/nginx && chown -R nginx:nginx /var/log/nginx /var/cache/nginx
+
+# Copy the configuration file to nginx
+COPY ./conf.d /etc/nginx/conf.d
+COPY ./nginx.conf /etc/nginx/nginx.conf
+

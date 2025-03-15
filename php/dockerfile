@@ -1,0 +1,25 @@
+FROM php:8.2-fpm-alpine
+
+WORKDIR /var/www/html
+
+# Install system dependencies
+RUN apk update && apk add --no-cache \
+    git \
+    zip \
+    unzip \
+    libpng-dev \
+    libzip-dev \
+    libxml2-dev \
+    oniguruma-dev \
+    freetype-dev \
+    libjpeg-turbo-dev \
+    libpng-dev \
+    libwebp-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-install -j$(nproc) pdo_mysql mbstring exif pcntl bcmath gd zip
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Clean up
+RUN apk del --purge && rm -rf /var/cache/apk/*
