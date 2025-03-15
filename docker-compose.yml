@@ -8,7 +8,7 @@ services:
     command: --default-authentication-plugin=mysql_native_password
     restart: unless-stopped
     ports:
-      - "3306:3306"
+      - "3306:6603"
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret} # Use environment variable or default to secret
       MYSQL_DATABASE: ${DB_DATABASE:-laravel} # Use environment variable or default to laravel
@@ -55,7 +55,7 @@ services:
     container_name: laravel_nginx
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "80:8088"
     volumes:
       - ./www:/var/www/html
       - ./nginx/conf.d:/etc/nginx/conf.d
