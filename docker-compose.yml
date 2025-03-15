@@ -4,18 +4,20 @@ services:
   # MySQL Database Service
   db:
     image: mysql:8.0
-    container_name: laravel_db
     command: --default-authentication-plugin=mysql_native_password
-    restart: unless-stopped
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: unless-stopped
     ports:
       - "6613:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret} # Use environment variable or default to secret
-      MYSQL_DATABASE: ${DB_DATABASE:-laravel} # Use environment variable or default to laravel
-      MYSQL_USER: ${DB_USERNAME:-laraveluser}  # Use environment variable or default to laraveluser
-      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}   # Use environment variable or default to secret
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_DATABASE: ${DB_DATABASE:-laravel}
+      MYSQL_USER: ${DB_USERNAME:-laraveluser}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
     volumes:
-      - db-data:/var/lib/mysql # Changed to Docker volume
+      - db-data:/var/lib/mysql
     networks:
       - app-network
 
@@ -24,13 +26,13 @@ services:
     build:
       context: ./php
       dockerfile: Dockerfile
-    container_name: laravel_app
-    restart: unless-stopped
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: unless-stopped
     working_dir: /var/www/html
     volumes:
       - ./www:/var/www/html
-    #expose:
-    #  - "9000"
     depends_on:
       - db
     environment:
@@ -40,10 +42,6 @@ services:
       DB_DATABASE: ${DB_DATABASE:-laravel}
       DB_USERNAME: ${DB_USERNAME:-laraveluser}
       DB_PASSWORD: ${DB_PASSWORD:-secret}
-      # Add any other environment variables your Laravel app needs here
-      # For example:
-      # APP_ENV: local
-      # APP_DEBUG: true
     networks:
       - app-network
 
@@ -52,8 +50,13 @@ services:
     build:
       context: ./nginx
       dockerfile: Dockerfile
-    container_name: laravel_nginx
-    restart: unless-stopped
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: unless-stopped
+      placement:
+        constraints:
+          - node.role == manager
     ports:
       - "8088:80"
     volumes:
@@ -67,7 +70,7 @@ services:
 
 # Define Docker volumes
 volumes:
-  db-data: # Define the volume for MySQL data
+  db-data:
 
 networks:
   app-network:
